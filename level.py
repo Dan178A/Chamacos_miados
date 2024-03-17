@@ -10,6 +10,9 @@ from pygame.sprite import Group
 
 
 class Level:
+    dt = 0
+    score = 0
+
     def __init__(self, game, state):
         # Level class init function, initialize attributes
         self.game = game
@@ -17,7 +20,7 @@ class Level:
         self.display_surface = pg.display.get_surface()
         self.sprite_group = Group()
         self.game_scroll = [0, 0]
-        self.player = Player(game, (tile * 4 + tile // 2, tile * 4 + tile // 2), self.sprite_group)
+        self.player = Player(game, (tile * 4 + tile // 2, tile * 4 + tile // 2), self.sprite_group, self.dt)
         self.hand = Hand(self.sprite_group)
         self.fish = Fish(self.sprite_group)
         self.level_background = level1_image
@@ -33,6 +36,7 @@ class Level:
         self.fishing_tiles = None
         self.collision_tiles = None
         self.current_board = None
+        self.score = 0
 
     def next_level(self):
         """
@@ -86,14 +90,16 @@ class Level:
                 return True
         return False
 
-    def fishing(self):
+    def fishing(self,dt):
         """
         Fishing events; handles key events while fishing.
         :return:
         """
-        print("fishing")
+        # print("fishing")
         self.state = "fishing"
+
         # self.s
+        # Crear un contador
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
@@ -104,11 +110,16 @@ class Level:
                     sys.exit()
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if self.hand.grab(self.fish):
-                    self.current_level = 0
-                    # self.state = "level1"
-                    self.next_level()
+                    self.score += 1
+                    print(f"Score: {self.score}")
+                    self.fish.catch_and_go()
+                    self.fish = Fish(self.sprite_group)
                 else:
+                    print("No fish")
                     pass
+                if self.score == 5:
+                    self.state = "level1"
+                self.fish.draw(dt)
             elif event.type == pg.MOUSEBUTTONUP:
                 self.hand.reset_hand()
 
@@ -211,12 +222,13 @@ class Level:
         :param dt:
         :return:
         """
+        self.dt = dt
         if self.state == "menu":
             self.menu()
         if self.state == "level1":
             self.level1(dt)
         if self.state == "fishing":
-            self.fishing()
+            self.fishing(dt)
         self.draw(dt)
 
     def draw(self, dt):
@@ -243,6 +255,10 @@ class Level:
             self.player.draw()
 
         if self.state == "fishing":
+            # fishes = [Fish(self.sprite_group) for _ in range(20)]
             window.blit(river_image, (0, 0))
+            # for fish in fishes:
+            #     fish.draw(dt)
+            # self.hand.draw(dt)
             self.fish.draw(dt)
             self.hand.draw(dt)

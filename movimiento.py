@@ -33,10 +33,12 @@ def palm_centroid(coordinates_list):
     return centroid
 class camara:
     player = None
-    def __init__(self,player_):
+    def __init__(self,player_,dt):
         global player
+        global dt_
         player = player_
         pygame.init()
+        dt_ = dt
 
     def init(self, printHand=False, lengthCenterLine=1, lengthCirc=1):
         mp_drawing = mp.solutions.drawing_utils
@@ -236,7 +238,7 @@ class camara:
                         else: 
                             direccion = ""
                         self.press_key_(direccion)
-
+                        self.pescar(cerrado)
                         # Pinta los puntos de la mano
                         if printHand:
                             mp_drawing.draw_landmarks(
@@ -262,7 +264,18 @@ class camara:
 
 
 
-    
+    def pescar(self, status):
+        if status:
+            event_right_down = pygame.event.Event(pygame.KEYUP, key=pygame.K_d)
+            pygame.event.post(event_right_down)
+            event_space = pygame.event.Event(pygame.KEYDOWN, key=pygame.K_SPACE)
+            pygame.event.post(event_space)
+            # print("cerr")
+            player.input("cerrando")
+        else:
+            event_space = pygame.event.Event(pygame.KEYUP, key=pygame.K_SPACE)
+            pygame.event.post(event_space)
+        
     def press_key_(self,direction):
         if player is not None:
             if not direction == "":
@@ -270,7 +283,7 @@ class camara:
             else:
                 event_right_down = pygame.event.Event(pygame.KEYUP, key=pygame.K_d)
             pygame.event.post(event_right_down)
-            player.input("Desde movimiento")
+            player.input(dt_,"Desde movimiento")
             player.update_direction_from_camera(direction)
 
     def liberarTecla(self,direction):

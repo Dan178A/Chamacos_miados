@@ -8,7 +8,7 @@ from timer import Timer
 from movimiento import camara
 import threading
 class Player(pg.sprite.Sprite):
-    def __init__(self, game, position, group):
+    def __init__(self, game, position, group,dt):
         # Player class init function, initialize sprite group attributes
         super().__init__(group)
         self.game = game
@@ -24,7 +24,8 @@ class Player(pg.sprite.Sprite):
         self.moving = False
         self.collision_timer = pg.time.get_ticks()
         self.set_animation()  # instantiate all animation images and the timers
-        movimiento = camara(self)
+        self.dt = dt
+        movimiento = camara(self,dt)
         t = threading.Thread(target=movimiento.init, args=(False, 1, 1))
         t.start()
 
@@ -47,7 +48,7 @@ class Player(pg.sprite.Sprite):
         self.left_timer = Timer(self.left_images, 0, delay=50)
         self.timer = self.up_timer
 
-    def input(self,pave = "En otro lado"):
+    def input(self,dt,pave = "En otro lado",):
         """
         Key input getter, direction and animations setter
         :return:
@@ -85,7 +86,7 @@ class Player(pg.sprite.Sprite):
             self.dir = "right"
             self.moving = True
         elif keys[pg.K_SPACE]:
-            self.game.level.fishing()
+            self.game.level.fishing(dt)
         else:
             self.direction.x = 0
             
@@ -159,7 +160,7 @@ class Player(pg.sprite.Sprite):
         :param dt:
         :return:
         """
-        # self.input()
+        # self.input(dt)
         self.move(dt)
 
     def draw(self):
