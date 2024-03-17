@@ -1,4 +1,4 @@
-# Capybara Fisher Controler by Cv2
+# Isla del Capy Controler by Cv2
 
 ## How to play
 - Press P to Play
