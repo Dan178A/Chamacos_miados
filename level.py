@@ -185,10 +185,10 @@ class Level:
         Main Menu Titles
         Encapsulated drop shadow functions for tiles, title bounce effect
         """
-        title_drop_shadow = title_font.render("CAPYBARA FISHER", False, self.drop_color)
+        title_drop_shadow = title_font.render("Isla del Capy", False, self.drop_color)
         title_drop_shadow.set_alpha(100)
         window.blit(title_drop_shadow, (x1 - 10 - self.text_bounce, y1 - 10 - self.text_bounce))
-        title = title_font.render("CAPYBARA FISHER", False, white)
+        title = title_font.render("Isla del Capy", False, white)
         window.blit(title, (x1 + self.text_bounce, y1 + self.text_bounce))
         play_drop_shadow = play_font.render("- press p to play -", False, self.drop_color)
         play_drop_shadow.set_alpha(100)
