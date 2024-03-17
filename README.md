@@ -1,8 +1,4 @@
-# Capybara Fisher
- Microsoft "Pygames" Hackathon Submission, Created by:
-- Benjamin Fuller
-- Jose Sanrindo
-- Arman Ambia
+# Capybara Fisher Controler by Cv2
 
 ## How to play
 - Press P to Play

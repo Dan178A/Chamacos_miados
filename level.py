@@ -11,6 +11,8 @@ from pygame.sprite import Group
 
 class Level:
     dt = 0
+    score = 0
+
     def __init__(self, game, state):
         # Level class init function, initialize attributes
         self.game = game
@@ -34,6 +36,7 @@ class Level:
         self.fishing_tiles = None
         self.collision_tiles = None
         self.current_board = None
+        self.score = 0
 
     def next_level(self):
         """
@@ -97,7 +100,6 @@ class Level:
 
         # self.s
         # Crear un contador
-        score = 0
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
@@ -108,13 +110,16 @@ class Level:
                     sys.exit()
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if self.hand.grab(self.fish):
-                    score += 1
-                    print(f"Score: {score}")
+                    self.score += 1
+                    print(f"Score: {self.score}")
                     self.fish.catch_and_go()
                     self.fish = Fish(self.sprite_group)
-                    self.fish.draw(dt)
                 else:
+                    print("No fish")
                     pass
+                if self.score == 5:
+                    self.state = "level1"
+                self.fish.draw(dt)
             elif event.type == pg.MOUSEBUTTONUP:
                 self.hand.reset_hand()
 
@@ -191,10 +196,10 @@ class Level:
         Main Menu Titles
         Encapsulated drop shadow functions for tiles, title bounce effect
         """
-        title_drop_shadow = title_font.render("CAPYBARA FISHER", False, self.drop_color)
+        title_drop_shadow = title_font.render("Isla del Capy", False, self.drop_color)
         title_drop_shadow.set_alpha(100)
         window.blit(title_drop_shadow, (x1 - 10 - self.text_bounce, y1 - 10 - self.text_bounce))
-        title = title_font.render("CAPYBARA FISHER", False, white)
+        title = title_font.render("Isla del Capy", False, white)
         window.blit(title, (x1 + self.text_bounce, y1 + self.text_bounce))
         play_drop_shadow = play_font.render("- press p to play -", False, self.drop_color)
         play_drop_shadow.set_alpha(100)

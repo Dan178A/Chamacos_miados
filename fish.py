@@ -81,7 +81,10 @@ class Fish(pg.sprite.Sprite):
 
     def catch_and_go(self):
         """Make fish image disappear by setting alpha to 0."""
+        self.grabbed = False
         self.fish.set_alpha(0)
+        self.fish.set_alpha(1)
+        self.swim()
 
     def caught(self):
         """Set self.grabbed to True"""
@@ -92,3 +95,8 @@ class Fish(pg.sprite.Sprite):
         """Fish sprite update and blit func"""
         self.update(dt)
         window.blit(self.fish, (self.rect.x, self.rect.y))
+        
+    def on_screen(self):
+        """Check if fish is on screen"""
+        screen_rect = pg.display.get_surface().get_rect()
+        return self.rect.colliderect(screen_rect)
