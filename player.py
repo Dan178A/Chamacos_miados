@@ -56,8 +56,11 @@ class Player(pg.sprite.Sprite):
         """
         cerrado = False
         # print(pave)
+        print(self.position)
         keys = pg.key.get_pressed()
-        if pave == "cerrando": cerrado = True
+        if pave == "cerrando": 
+            if self.position[1] > 1400:
+                cerrado = True
 
         self.moving = False
         # direction handling

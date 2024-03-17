@@ -265,7 +265,7 @@ class camara:
 
 
     def pescar(self, status):
-        return
+        # return
         if status:
             event_right_down = pygame.event.Event(pygame.KEYUP, key=pygame.K_d)
             pygame.event.post(event_right_down)
