@@ -29,6 +29,7 @@ class Game:
         while True:
             dt = time.time() - self.previous_time  # delta time
             self.previous_time = time.time()
+            self.level.dt = dt
             self.level.update(dt)
             draw()
 
