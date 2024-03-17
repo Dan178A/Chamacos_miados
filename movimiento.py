@@ -249,6 +249,9 @@ class camara:
 
                         # La variable direccion tiene la orientacion hacia donde vamos,
                         # La variable cerrado nos indica si tenemos la mano cerrada
+                else:
+                    self.liberarTecla("")
+                
                 cv2.imshow("Frame", frame)
                 if cv2.waitKey(1) & 0xFF == 27:
                     break
