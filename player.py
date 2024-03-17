@@ -52,7 +52,8 @@ class Player(pg.sprite.Sprite):
         Key input getter, direction and animations setter
         :return:
         """
-        print(pave)
+        if pave == "cerrando":
+            print(pg.key.get_pressed())
         keys = pg.key.get_pressed()
         self.moving = False
         # direction handling
