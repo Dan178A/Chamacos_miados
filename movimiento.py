@@ -238,7 +238,7 @@ class camara:
                         else: 
                             direccion = ""
                         self.press_key_(direccion)
-                        self.pescar(cerrado)
+                        # self.pescar(cerrado)
                         # Pinta los puntos de la mano
                         if printHand:
                             mp_drawing.draw_landmarks(
