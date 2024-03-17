@@ -47,13 +47,14 @@ class Player(pg.sprite.Sprite):
         self.left_timer = Timer(self.left_images, 0, delay=50)
         self.timer = self.up_timer
 
-    def input(self,pave = "En otro lado"):
+    def input(self,pave = "En otro lado", movimiento = ""):
         """
         Key input getter, direction and animations setter
         :return:
         """
         if pave == "cerrando":
-            print(pg.key.get_pressed())
+            self.game.level.fishing()
+
         keys = pg.key.get_pressed()
         self.moving = False
         # direction handling
