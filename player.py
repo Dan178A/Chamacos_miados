@@ -47,11 +47,12 @@ class Player(pg.sprite.Sprite):
         self.left_timer = Timer(self.left_images, 0, delay=50)
         self.timer = self.up_timer
 
-    def input(self):
+    def input(self,pave = "En otro lado"):
         """
         Key input getter, direction and animations setter
         :return:
         """
+        print(pave)
         keys = pg.key.get_pressed()
         self.moving = False
         # direction handling
@@ -158,7 +159,7 @@ class Player(pg.sprite.Sprite):
         :param dt:
         :return:
         """
-        self.input()
+        # self.input()
         self.move(dt)
 
     def draw(self):

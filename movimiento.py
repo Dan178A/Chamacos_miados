@@ -43,6 +43,15 @@ class camara:
         mp_drawing_styles = mp.solutions.drawing_styles
         mp_hands = mp.solutions.hands
 
+
+        close_hand = cv2.imread('./images/close-hand.jpg')
+        close_hand_resized = cv2.resize(close_hand, (100, 100))
+        close_hand_resized = np.array(close_hand_resized, dtype=np.uint8)
+
+        open_hand = cv2.imread('./images/open-hand.jpg')
+        open_hand_resized = cv2.resize(open_hand, (100, 100))
+        open_hand_resized = np.array(open_hand_resized, dtype=np.uint8)
+
         camera_index = find_available_camera()
         if camera_index is not None:
             cap = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)
@@ -158,7 +167,7 @@ class camara:
                         fingers = dif > 0
                         fingers = np.append(thumb_finger, fingers)
                         # print(fingers)
-                        cerrado = np.all(fingers)
+                        cerrado = not np.all(fingers)
 
                         #########################################################################
 
@@ -201,55 +210,32 @@ class camara:
                             x_cercano = x_c - radio
                             y_cercano = y_c
                             direccion = "Izquierda"
-                        # if cerrado:
-                        #     if direccion == "Inferior":
-                        #         threading.Thread(
-                        #             target=self.press_key, args=('s',)).start()
-                        #         print("Abajo")
-                        #     elif direccion == "Derecha":
-                        #         threading.Thread(
-                        #             target=self.press_key, args=('d',)).start()
-                        #         print("Derecha")
-                        #     elif direccion == "Superior":
-                        #         threading.Thread(
-                        #             target=self.press_key, args=('w',)).start()
-                        #         print("Arriba")
-                        #     elif direccion == "Izquierda":
-                        #         threading.Thread(
-                        #             target=self.press_key, args=('a',)).start()
-                        #         print("Izquierda")
-                        # else:
-                        #     threading.Thread(
-                        #         target=self.release_key, args=('s',)).start()
-                        #     threading.Thread(
-                        #         target=self.release_key, args=('d',)).start()
-                        #     threading.Thread(
-                        #         target=self.release_key, args=('w',)).start()
-                        #     threading.Thread(
-                        #         target=self.release_key, args=('a',)).start()
-                        # keys = pg.key.get_pressed()
-                        # if keys[pg.K_w]:
-                        #     print("Arriba")
-                        # if keys[pg.K_s]:
-                        #     print("Abajo")
-                        # if keys[pg.K_a]:
-                        #     print("Izquierda")
-                        # if keys[pg.K_d]:
-                        #     print("Derecha")
-                        if cerrado:
-                            print(direccion)
-                            if direccion == "Inferior":
-                                self.press_key_('Inferior')# threading.Thread(target=self.press_key_, args=('Inferior')).start()
-                            elif direccion == "Derecha":
-                                self.press_key_('Derecha')# threading.Thread(target=self.press_key_, args=('Derecha')).start()
-                            elif direccion == "Superior":
-                                self.press_key_('Superior')# threading.Thread(target=self.press_key_, args=('Superior')).start()
-                            elif direccion == "Izquierda":
-                                self.press_key_('Izquierda')# threading.Thread(target=self.press_key_, args=('Izquierda')).start()
+                       
+                        rangex1 = (width/2)+(width*0.1)
+                        rangex2 = (width/2)-(width*0.1)
+                        rangey1 = (height/2)+(height*0.1)
+                        rangey2 = (height/2)-(height*0.1)
 
-                        # Dibuja una linea desde el centro de la mano hasta el borde
-                        cv2.line(frame, (int(x_p), int(y_p)), (int(x_cercano), int(
-                            y_cercano)), (0, 255, 0), lengthCenterLine)
+
+                        if cerrado:
+                            mask = close_hand_resized != 255
+                            mask = mask[:close_hand_resized.shape[0], :close_hand_resized.shape[1]]
+                            frame[0:close_hand_resized.shape[0], 0:close_hand_resized.shape[1]][mask] = close_hand_resized[mask]
+                        else:
+                            mask = open_hand_resized != 255
+                            mask = mask[:open_hand_resized.shape[0], :open_hand_resized.shape[1]]
+                            frame[0:open_hand_resized.shape[0], 0:open_hand_resized.shape[1]][mask] = open_hand_resized[mask]
+
+                        cv2.line(frame, (int(rangex1), int( rangey1)), (int(rangex2), int( rangey1)), (0, 255, 0), 2)
+                        cv2.line(frame, (int(rangex1), int( rangey2)), (int(rangex2), int( rangey2)), (0, 255, 0), 2)
+                        cv2.line(frame, (int(rangex1), int(rangey1)), (int(rangex1), int(rangey2)), (0, 255, 0), 2)
+                        cv2.line(frame, (int(rangex2), int(rangey1)), (int(rangex2), int(rangey2)), (0, 255, 0), 2)
+                        if not( (x_p < rangex1 and x_p > rangex2) and  (y_p < rangey1 and y_p > rangey2)):
+                            # Dibuja una linea desde el centro de la mano hasta el borde
+                            cv2.line(frame, (int(x_p), int(y_p)), (int(x_cercano), int(y_cercano)), (0, 255, 0), lengthCenterLine)
+                        else: 
+                            direccion = ""
+                        self.press_key_(direccion)
 
                         # Pinta los puntos de la mano
                         if printHand:
@@ -276,14 +262,29 @@ class camara:
     
     def press_key_(self,direction):
         if player is not None:
+            if not direction == "":
+                event_right_down = pygame.event.Event(pygame.KEYDOWN, key=pygame.K_d)
+            else:
+                event_right_down = pygame.event.Event(pygame.KEYUP, key=pygame.K_d)
+            pygame.event.post(event_right_down)
+            player.input("Desde movimiento")
             player.update_direction_from_camera(direction)
 
-    def press_key(self,key):
-        event = pygame.event.Event(pygame.KEYDOWN, unicode=key, key=pygame.key.key_code(key), mod=pygame.KMOD_NONE)
-        pygame.event.post(event)
+    def liberarTecla(self,direction):
+        event_right_up = pygame.event.Event(pygame.KEYUP, key=pygame.K_RIGHT)
+        pygame.event.post(event_right_up)
+        player.input("Desde movimiento")
+        player.update_direction_from_camera(direction)
+
+
+    def press_key_right(self):
+        event_right_down = pygame.event.Event(pygame.KEYDOWN, key=pygame.K_d)
+        pygame.event.post(event_right_down)
+        player.input("Desde movimiento")
+        
 
     def release_key(self,key):
-        event = pygame.event.Event(pygame.KEYUP, unicode=key, key=pygame.key.key_code(key), mod=pygame.KMOD_NONE)
+        event = pygame.event.Event(pygame.KEYUP, key=pygame.key.key_code(key), mod=pygame.KMOD_NONE)
         pygame.event.post(event)
 
 
