@@ -275,9 +275,12 @@ class camara:
 
     def liberarTecla(self,direction):
         event_right_up = pygame.event.Event(pygame.KEYUP, key=pygame.K_RIGHT)
-        pygame.event.post(event_right_up)
-        player.input("Desde movimiento")
-        player.update_direction_from_camera(direction)
+        try:
+            pygame.event.post(event_right_up)
+            player.input("Desde movimiento")
+            player.update_direction_from_camera(direction)
+        except pygame.error:
+            pass
 
 
     def press_key_right(self):

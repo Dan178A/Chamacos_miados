@@ -52,7 +52,7 @@ class Player(pg.sprite.Sprite):
         Key input getter, direction and animations setter
         :return:
         """
-        print(pave)
+        # print(pave)
         keys = pg.key.get_pressed()
         self.moving = False
         # direction handling
