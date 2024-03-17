@@ -201,9 +201,9 @@ class Level:
         window.blit(title_drop_shadow, (x1 - 10 - self.text_bounce, y1 - 10 - self.text_bounce))
         title = title_font.render("Isla del Capy", False, white)
         window.blit(title, (x1 + self.text_bounce, y1 + self.text_bounce))
-        play_drop_shadow = play_font.render("- press p to play -", False, self.drop_color)
+        play_drop_shadow = play_font.render("- presiona P para iniciar -", False, self.drop_color)
         play_drop_shadow.set_alpha(100)
-        play_title = play_font.render("- press p to play -", False, white)
+        play_title = play_font.render("- presiona P para iniciar -", False, white)
 
         # Text bounce effect + flashing play title
         cur = pg.time.get_ticks() - self.time
