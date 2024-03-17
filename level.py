@@ -97,7 +97,6 @@ class Level:
         """
         # print("fishing")
         self.state = "fishing"
-
         # self.s
         # Crear un contador
         for event in pg.event.get():
@@ -173,6 +172,8 @@ class Level:
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_p:
                     self.state = "level1"
+                    self.player.initMovimiento()
+                    
                     self.next_level()
                 if event.key == pg.K_ESCAPE:
                     pg.quit()  # quit on esc key

@@ -238,6 +238,7 @@ class camara:
                         else: 
                             direccion = ""
                         self.press_key_(direccion)
+                        self.pescar(cerrado)
                         # self.pescar(cerrado)
                         # Pinta los puntos de la mano
                         if printHand:
@@ -265,13 +266,14 @@ class camara:
 
 
     def pescar(self, status):
+        return
         if status:
             event_right_down = pygame.event.Event(pygame.KEYUP, key=pygame.K_d)
             pygame.event.post(event_right_down)
             event_space = pygame.event.Event(pygame.KEYDOWN, key=pygame.K_SPACE)
             pygame.event.post(event_space)
             # print("cerr")
-            player.input("cerrando")
+            player.input(dt_,"cerrando")
         else:
             event_space = pygame.event.Event(pygame.KEYUP, key=pygame.K_SPACE)
             pygame.event.post(event_space)

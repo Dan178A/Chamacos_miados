@@ -25,10 +25,11 @@ class Player(pg.sprite.Sprite):
         self.collision_timer = pg.time.get_ticks()
         self.set_animation()  # instantiate all animation images and the timers
         self.dt = dt
-        movimiento = camara(self,dt)
-        t = threading.Thread(target=movimiento.init, args=(False, 1, 1))
+        self.movimiento = camara(self,dt)
+        
+    def initMovimiento(self):
+        t = threading.Thread(target=self.movimiento.init, args=(False, 1, 1))
         t.start()
-
     def set_animation(self):
         """
         Animation framework function for player character. Sets animations and timing for direction handling.
@@ -53,8 +54,11 @@ class Player(pg.sprite.Sprite):
         Key input getter, direction and animations setter
         :return:
         """
+        cerrado = False
         # print(pave)
         keys = pg.key.get_pressed()
+        if pave == "cerrando": cerrado = True
+
         self.moving = False
         # direction handling
         # uses wasd key inputs for player direction
@@ -85,7 +89,7 @@ class Player(pg.sprite.Sprite):
             self.standard_image = self.right_images[0]
             self.dir = "right"
             self.moving = True
-        elif keys[pg.K_SPACE]:
+        elif keys[pg.K_SPACE] or cerrado:
             self.game.level.fishing(dt)
         else:
             self.direction.x = 0
