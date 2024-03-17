@@ -55,7 +55,7 @@ class Fish(pg.sprite.Sprite):
         self.rect = self.fish.get_rect(center=self.position)
         screen = pg.display.get_surface()
         self.area = screen.get_rect()
-        self.speed = 1
+        self.speed = 2
         self.grabbed = False
 
     def update(self, dt):
