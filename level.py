@@ -11,6 +11,8 @@ from pygame.sprite import Group
 
 class Level:
     dt = 0
+    score = 0
+
     def __init__(self, game, state):
         # Level class init function, initialize attributes
         self.game = game
@@ -34,6 +36,7 @@ class Level:
         self.fishing_tiles = None
         self.collision_tiles = None
         self.current_board = None
+        self.score = 0
 
     def next_level(self):
         """
@@ -97,7 +100,6 @@ class Level:
 
         # self.s
         # Crear un contador
-        score = 0
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
@@ -108,12 +110,15 @@ class Level:
                     sys.exit()
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if self.hand.grab(self.fish):
-                    score += 1
-                    print(f"Score: {score}")
+                    self.score += 1
+                    print(f"Score: {self.score}")
                     self.fish.catch_and_go()
                     self.fish = Fish(self.sprite_group)
                 else:
+                    print("No fish")
                     pass
+                if self.score == 5:
+                    self.state = "level1"
                 self.fish.draw(dt)
             elif event.type == pg.MOUSEBUTTONUP:
                 self.hand.reset_hand()
