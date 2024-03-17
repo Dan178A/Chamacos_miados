@@ -300,7 +300,7 @@ class camara:
     def press_key_right(self):
         event_right_down = pygame.event.Event(pygame.KEYDOWN, key=pygame.K_d)
         pygame.event.post(event_right_down)
-        player.input("Desde movimiento")
+        player.input(dt_,"Desde movimiento")
         
 
     def release_key(self,key):
