@@ -112,9 +112,9 @@ class Level:
                     print(f"Score: {score}")
                     self.fish.catch_and_go()
                     self.fish = Fish(self.sprite_group)
-                    self.fish.draw(dt)
                 else:
                     pass
+                self.fish.draw(dt)
             elif event.type == pg.MOUSEBUTTONUP:
                 self.hand.reset_hand()
 

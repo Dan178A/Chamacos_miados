@@ -81,7 +81,10 @@ class Fish(pg.sprite.Sprite):
 
     def catch_and_go(self):
         """Make fish image disappear by setting alpha to 0."""
+        self.grabbed = False
         self.fish.set_alpha(0)
+        self.fish.set_alpha(1)
+        self.swim()
 
     def caught(self):
         """Set self.grabbed to True"""

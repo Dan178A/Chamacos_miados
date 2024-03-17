@@ -160,7 +160,7 @@ class Player(pg.sprite.Sprite):
         :param dt:
         :return:
         """
-        self.input(dt)
+        # self.input(dt)
         self.move(dt)
 
     def draw(self):
