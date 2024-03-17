@@ -1,0 +1,293 @@
+import cv2
+import mediapipe as mp
+import numpy as np
+import pyautogui
+import threading
+import pygame 
+from math import acos, degrees
+def find_available_camera():
+    for i in range(2):  # Prueba con las cámaras 0 y 1
+        cap = cv2.VideoCapture(i, cv2.CAP_DSHOW)
+        if cap.isOpened():
+            print(f"La cámara {i} está disponible.")
+            cap.release()
+            return i
+    print("No se encontró ninguna cámara disponible.")
+    return None
+def xScale( value, width):
+    return (value / 100) * width
+
+def invertXScale( value, width):
+    return (value / width) * 100
+
+def yScale( value, height):
+    return (value / 100) * height
+
+def invertYScale( value, height):
+    return (value / height) * 100
+
+def palm_centroid(coordinates_list):
+    coordinates = np.array(coordinates_list)
+    centroid = np.mean(coordinates, axis=0)
+    centroid = int(centroid[0]), int(centroid[1])
+    return centroid
+class camara:
+    player = None
+    def __init__(self,player_):
+        global player
+        player = player_
+        pygame.init()
+
+    def init(self, printHand=False, lengthCenterLine=1, lengthCirc=1):
+        mp_drawing = mp.solutions.drawing_utils
+        mp_drawing_styles = mp.solutions.drawing_styles
+        mp_hands = mp.solutions.hands
+
+        camera_index = find_available_camera()
+        if camera_index is not None:
+            cap = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)
+        else:
+            return
+
+        # Pulgar
+        thumb_points = [1, 2, 4]
+
+        # Indice, medio, anular y meñique
+        palm_points = [0, 1, 2, 5, 9, 13, 17]
+
+        fingertips_points = [8, 12, 16, 20]
+        finger_base_points = [6, 10, 14, 18]
+
+        # Colores
+        GREEN = (48, 255, 48)
+        BLUE = (192, 101, 21)
+        YELLOW = (128, 64, 128)
+        PURPLE = (128, 64, 128)
+        PEACH = (180, 229, 255)
+
+        with mp_hands.Hands(
+            model_complexity=1,
+            # Establecer en False si se utiliza video y True si se usan imagenes
+            static_image_mode=False,
+            max_num_hands=1,
+            min_detection_confidence=0.5,
+                min_tracking_confidence=0.5) as hands:
+            fingers_counter = "_"
+
+            while True:
+                thickness = [2, 2, 2, 2, 2]
+                ret, frame = cap.read()
+                if ret == False:
+                    break
+
+                frame = cv2.flip(frame, 1)
+                height, width, _ = frame.shape
+                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                results = hands.process(frame_rgb)
+
+                radio = int(height/3)
+                center = np.array([int(width/2), int(height/2)])
+                cv2.circle(frame, (center[0], center[1]),
+                           radio, (0, 255, 0), lengthCirc)
+
+                cerrado = False
+
+                if results.multi_hand_landmarks:
+                    coordinates_thumb = []
+                    coordinates_palm = []
+                    coordinates_ft = []
+                    coordinates_fb = []
+                    for hand_landmarks in results.multi_hand_landmarks:
+
+                        # Obtener puntos de la palma de la mano
+                        for index in palm_points:
+                            x = int(hand_landmarks.landmark[index].x * width)
+                            y = int(hand_landmarks.landmark[index].y * height)
+                            coordinates_palm.append([x, y])
+                        # Obtener puntos de la punta de los dedos
+                        for index in fingertips_points:
+                            x = int(hand_landmarks.landmark[index].x * width)
+                            y = int(hand_landmarks.landmark[index].y * height)
+                            coordinates_ft.append([x, y])
+                        # Obtener puntos de la base de los dedos
+                        for index in finger_base_points:
+                            x = int(hand_landmarks.landmark[index].x * width)
+                            y = int(hand_landmarks.landmark[index].y * height)
+                            coordinates_fb.append([x, y])
+                        # Obtener puntos de los pulgares
+                        for index in thumb_points:
+                            x = int(hand_landmarks.landmark[index].x * width)
+                            y = int(hand_landmarks.landmark[index].y * height)
+                            coordinates_thumb.append([x, y])
+
+                        # nx, ny = palm_centroid(coordinates_palm)
+
+                        ################### Calculos para el cierre de la mano ##################
+                        #############
+                        # Pulgar
+                        p1 = np.array(coordinates_thumb[0])
+                        p2 = np.array(coordinates_thumb[1])
+                        p3 = np.array(coordinates_thumb[2])
+
+                        l1 = np.linalg.norm(p2 - p3)
+                        l2 = np.linalg.norm(p1 - p3)
+                        l3 = np.linalg.norm(p1 - p2)
+
+                        # Calcular el angulo
+                        angle = degrees(
+                            acos((l1**2 + l3**2 - l2**2)/(2 * l1 * l3)))
+                        thumb_finger = np.array(False)
+                        if angle > 150:
+                            thumb_finger = np.array(True)
+
+                        ####################
+
+                        # Indice, medio, anular y meñique
+                        nx, ny = palm_centroid(coordinates_palm)
+                        cv2.circle(frame, (nx, ny), 3, (0, 255, 0), 2)
+                        coordinates_centroid = np.array([nx, ny])
+                        coordinates_ft = np.array(coordinates_ft)
+                        coordinates_fb = np.array(coordinates_fb)
+
+                        # Distancias
+                        d_centrid_ft = np.linalg.norm(
+                            coordinates_centroid - coordinates_ft, axis=1)
+                        d_centrid_fb = np.linalg.norm(
+                            coordinates_centroid - coordinates_fb, axis=1)
+                        dif = d_centrid_ft - d_centrid_fb
+                        fingers = dif > 0
+                        fingers = np.append(thumb_finger, fingers)
+                        # print(fingers)
+                        cerrado = np.all(fingers)
+
+                        #########################################################################
+
+                        # cv2.circle(frame, (nx, ny),3 ,(0, 255, 0), 2)
+                        coordinates_centroid = np.array([nx, ny])
+
+                        # Calculo de grados...
+                        x_c = center[0]
+                        y_c = center[1]
+                        x_p = coordinates_centroid[0]
+                        y_p = coordinates_centroid[1]
+                        x_cercano = x_c
+                        y_cercano = y_c
+
+                        # Resolver la ecuación para x y y
+                        distancia_superior = abs(y_p - (y_c + radio))
+                        distancia_derecha = abs(x_p - (x_c + radio))
+                        distancia_inferior = abs(y_p - (y_c - radio))
+                        distancia_izquierda = abs(x_p - (x_c - radio))
+
+                        # Encontrar la orilla más cercana
+                        orilla_mas_cercana = np.argmin(
+                            [distancia_superior, distancia_derecha, distancia_inferior, distancia_izquierda])
+                        direccion = ""
+                        # Calcular el punto más cercano en la orilla más cercana
+                        if orilla_mas_cercana == 0:  # Orilla Inferior
+                            x_cercano = x_c
+                            y_cercano = y_c + radio
+                            direccion = "Inferior"
+
+                        elif orilla_mas_cercana == 1:  # Orilla derecha
+                            x_cercano = x_c + radio
+                            y_cercano = y_c
+                            direccion = "Derecha"
+                        elif orilla_mas_cercana == 2:  # Orilla Superior
+                            x_cercano = x_c
+                            y_cercano = y_c - radio
+                            direccion = "Superior"
+                        else:  # Orilla izquierda
+                            x_cercano = x_c - radio
+                            y_cercano = y_c
+                            direccion = "Izquierda"
+                        # if cerrado:
+                        #     if direccion == "Inferior":
+                        #         threading.Thread(
+                        #             target=self.press_key, args=('s',)).start()
+                        #         print("Abajo")
+                        #     elif direccion == "Derecha":
+                        #         threading.Thread(
+                        #             target=self.press_key, args=('d',)).start()
+                        #         print("Derecha")
+                        #     elif direccion == "Superior":
+                        #         threading.Thread(
+                        #             target=self.press_key, args=('w',)).start()
+                        #         print("Arriba")
+                        #     elif direccion == "Izquierda":
+                        #         threading.Thread(
+                        #             target=self.press_key, args=('a',)).start()
+                        #         print("Izquierda")
+                        # else:
+                        #     threading.Thread(
+                        #         target=self.release_key, args=('s',)).start()
+                        #     threading.Thread(
+                        #         target=self.release_key, args=('d',)).start()
+                        #     threading.Thread(
+                        #         target=self.release_key, args=('w',)).start()
+                        #     threading.Thread(
+                        #         target=self.release_key, args=('a',)).start()
+                        # keys = pg.key.get_pressed()
+                        # if keys[pg.K_w]:
+                        #     print("Arriba")
+                        # if keys[pg.K_s]:
+                        #     print("Abajo")
+                        # if keys[pg.K_a]:
+                        #     print("Izquierda")
+                        # if keys[pg.K_d]:
+                        #     print("Derecha")
+                        if cerrado:
+                            print(direccion)
+                            if direccion == "Inferior":
+                                self.press_key_('Inferior')# threading.Thread(target=self.press_key_, args=('Inferior')).start()
+                            elif direccion == "Derecha":
+                                self.press_key_('Derecha')# threading.Thread(target=self.press_key_, args=('Derecha')).start()
+                            elif direccion == "Superior":
+                                self.press_key_('Superior')# threading.Thread(target=self.press_key_, args=('Superior')).start()
+                            elif direccion == "Izquierda":
+                                self.press_key_('Izquierda')# threading.Thread(target=self.press_key_, args=('Izquierda')).start()
+
+                        # Dibuja una linea desde el centro de la mano hasta el borde
+                        cv2.line(frame, (int(x_p), int(y_p)), (int(x_cercano), int(
+                            y_cercano)), (0, 255, 0), lengthCenterLine)
+
+                        # Pinta los puntos de la mano
+                        if printHand:
+                            mp_drawing.draw_landmarks(
+                                frame,
+                                hand_landmarks,
+                                mp_hands.HAND_CONNECTIONS,
+                                mp_drawing_styles.get_default_hand_landmarks_style(),
+                                mp_drawing_styles.get_default_hand_connections_style()
+                            )
+
+                        # La variable direccion tiene la orientacion hacia donde vamos,
+                        # La variable cerrado nos indica si tenemos la mano cerrada
+                cv2.imshow("Frame", frame)
+                if cv2.waitKey(1) & 0xFF == 27:
+                    break
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+
+
+
+    
+    def press_key_(self,direction):
+        if player is not None:
+            player.update_direction_from_camera(direction)
+
+    def press_key(self,key):
+        event = pygame.event.Event(pygame.KEYDOWN, unicode=key, key=pygame.key.key_code(key), mod=pygame.KMOD_NONE)
+        pygame.event.post(event)
+
+    def release_key(self,key):
+        event = pygame.event.Event(pygame.KEYUP, unicode=key, key=pygame.key.key_code(key), mod=pygame.KMOD_NONE)
+        pygame.event.post(event)
+
+
+# if __name__ == "__main__":
+#     movimiento = camara(None)
+#     t = threading.Thread(target=movimiento.init, args=(False, 1, 1))
+#     t.start()
